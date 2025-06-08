@@ -1,0 +1,104 @@
+{% comment %}
+  Floating Image Block for Editorial Statement Section
+  Supports desktop width, mobile width, and rotation
+{% endcomment %}
+
+<div id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.image %}
+    <img
+      class="editorial-under-images__image"
+      src="{{ block.settings.image | image_url }}"
+      alt=""
+      loading="lazy"
+      style="
+        top: {{ block.settings.y }}%;
+        left: {{ block.settings.x }}%;
+        width: {{ block.settings.width }}%;
+        z-index: {{ block.settings.z_index }};
+        position: absolute;
+        transform: rotate({{ block.settings.rotate }}deg);
+      "
+    />
+    <style>
+      @media screen and (max-width: 749px) {
+        #block-{{ block.id }} .editorial-under-images__image {
+          width: {{ block.settings.width_mobile }}% !important;
+        }
+      }
+    </style>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Floating Image",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "range",
+      "id": "x",
+      "label": "X Position (%)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "y",
+      "label": "Y Position (%)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "width",
+      "label": "Width (%) - Desktop",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "width_mobile",
+      "label": "Width (%) - Mobile",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "default": 80
+    },
+{
+  "type": "range",
+  "id": "rotate",
+  "label": "Rotation (degrees)",
+  "min": 0,
+  "max":100,
+  "step": 1,
+  "default": 0
+},
+    {
+      "type": "range",
+      "id": "z_index",
+      "label": "Z-index",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 5
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating Image",
+      "settings": {}
+    }
+  ]
+}
+
+{% endschema %}

@@ -1,0 +1,432 @@
+<style>
+.doodle-heading-wrapper-{{ block.id }} {
+  position: relative;
+
+  {% if block.settings.width == 'fill' %}
+    display: block;
+    width: 100%;
+  {% elsif block.settings.width == 'custom' %}
+    display: block;
+    width: {{ block.settings.custom_width }}%;
+  {% else %}
+    display: inline-block;
+    width: fit-content;
+  {% endif %}
+
+  padding-top: {{ block.settings.padding_block_start }}px;
+  padding-bottom: {{ block.settings.padding_block_end }}px;
+  padding-left: {{ block.settings.padding_inline_start }}px;
+  padding-right: {{ block.settings.padding_inline_end }}px;
+}
+
+
+
+
+  .doodle-heading-{{ block.id }} {
+    width:100%;
+    font-size: {{ block.settings.font_size }}px;
+    font-weight: {{ block.settings.font_weight }};
+    color: {{ block.settings.text_color }};
+    position: relative;
+    display: inline-block;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .doodle-text-span-{{ block.id }} {
+    position: relative;
+    display: inline-block;
+    padding: 0.25em 0.75em; /* Room for circle around text */
+    z-index: 2;
+  }
+
+  .doodle-svg-{{ block.id }} {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+    width: 140%;
+    height: 250%;
+  }
+
+  {% if block.settings.doodle_style == 'strikethrough' %}
+    .doodle-svg-{{ block.id }} {
+      top: 50%;
+      transform: translate(-50%, -50%);
+      height: 1em;
+      width: 110%;
+    }
+  {% endif %}
+
+  {% if block.settings.doodle_style contains 'underline' %}
+    .doodle-svg-{{ block.id }} {
+      top: 50%;
+      height: 1.5em;
+      transform: translateX(-50%);
+    }
+  {% endif %}
+
+  .doodle-svg-{{ block.id }} path,
+  .doodle-svg-{{ block.id }} ellipse {
+    stroke: {{ block.settings.doodle_color }};
+    stroke-width: {{ block.settings.stroke_width }};
+    fill: none;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+   /* animation: drawDoodle-{{ block.id }} {{ block.settings.animation_duration }}s ease-out forwards;*/
+  }
+
+  @keyframes drawDoodle-{{ block.id }} {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>
+<style>
+  .doodle-heading-{{ block.id }}.is-blurred {
+    opacity: 0;
+    filter: blur(6px);
+    transition: opacity 0.5s ease-out, filter 0.5s ease-out;
+  }
+
+  .doodle-heading-{{ block.id }}.is-visible {
+    opacity: 1;
+    filter: blur(0);
+  }
+</style>
+
+<div class="doodle-heading-wrapper-{{ block.id }}">
+<h2 class="doodle-heading-{{ block.id }}{% if block.settings.blur_on_animate %} is-blurred{% endif %}">
+    <span class="doodle-text-span-{{ block.id }}">
+      {{ block.settings.text }}
+    </span>
+
+    {% case block.settings.doodle_style %}
+      {% when 'underline-curve' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 500 60" preserveAspectRatio="none">
+          <path d="M10,40 Q250,60 490,40" />
+        </svg>
+      {% when 'underline-angry' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 500 60" preserveAspectRatio="none">
+          <path d="M5,40 L150,45 Q200,50 350,30 L495,40" />
+        </svg>
+      {% when 'underline-marker' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 500 60" preserveAspectRatio="none">
+          <path d="M5,45 Q250,65 495,45" />
+        </svg>
+      {% when 'underline-needle' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 500 40" preserveAspectRatio="none">
+          <path d="M5,30 Q100,20 250,30 Q400,40 495,30" />
+        </svg>
+      {% when 'underline-flat' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 500 20" preserveAspectRatio="none">
+          <path d="M10,10 L490,10" />
+        </svg>
+      {% when 'circle' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 200 100" preserveAspectRatio="none">
+          <ellipse cx="100" cy="50" rx="95" ry="40" />
+        </svg>
+      {% when 'strikethrough' %}
+        <svg class="doodle-svg-{{ block.id }}" viewBox="0 0 500 20" preserveAspectRatio="none">
+          <path d="M10,10 L490,10" />
+        </svg>
+    {% endcase %}
+  </h2>
+</div>
+
+<script>
+  function setupDoodleBlock_{{ block.id }}() {
+    const wrapper = document.querySelector('.doodle-heading-wrapper-{{ block.id }}');
+    const path = wrapper?.querySelector('.doodle-svg-{{ block.id }} path, .doodle-svg-{{ block.id }} ellipse');
+    const heading = wrapper?.querySelector('.doodle-heading-{{ block.id }}');
+
+    if (!wrapper || !path || !heading) return;
+
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = length;
+    path.style.strokeDashoffset = length;
+
+    const animate = () => {
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+      path.style.animation = "drawDoodle-{{ block.id }} {{ block.settings.animation_duration }}s ease-out forwards";
+
+      if (heading.classList.contains('is-blurred')) {
+        heading.classList.add('is-visible');
+      }
+    };
+
+    {% if block.settings.animate_on_scroll %}
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animate();
+
+            {% if block.settings.blur_on_animate %}
+              {% unless block.settings.blur_repeat %}
+                observer.unobserve(entry.target);
+              {% endunless %}
+            {% endif %}
+          } else {
+            {% if block.settings.blur_on_animate and block.settings.blur_repeat %}
+              heading.classList.remove('is-visible');
+            {% endif %}
+          }
+        });
+      }, { threshold: 0.4 });
+
+      observer.observe(wrapper);
+{% else %}
+  animate();
+
+  {% if block.settings.blur_on_animate and block.settings.blur_repeat %}
+    const blurObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          heading.classList.add('is-visible');
+        } else {
+          heading.classList.remove('is-visible');
+        }
+      });
+    }, { threshold: 0.4 });
+
+    blurObserver.observe(wrapper);
+  {% elsif block.settings.blur_on_animate %}
+    heading.classList.add('is-visible');
+  {% endif %}
+{% endif %}
+
+
+  }
+
+  document.addEventListener("DOMContentLoaded", setupDoodleBlock_{{ block.id }});
+
+  // Re-run when editing in theme editor
+  if (Shopify.designMode) {
+    document.addEventListener("shopify:section:load", function (e) {
+      const section = e.target;
+      if (section.querySelector('.doodle-heading-wrapper-{{ block.id }}')) {
+        setupDoodleBlock_{{ block.id }}();
+      }
+    });
+  }
+</script>
+
+
+
+
+
+{% schema %}
+{
+  "name": "Doodle Heading",
+  "tag": "h2",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Heading text",
+      "default": "Hand-Drawn Heading"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 80,
+      "step": 1,
+      "default": 36,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+
+    {
+      "type": "header",
+      "content": "Doodle Style"
+    },
+    {
+      "type": "select",
+      "id": "doodle_style",
+      "label": "Style",
+      "options": [
+        { "value": "underline-curve", "label": "Underline – Curve" },
+        { "value": "underline-angry", "label": "Underline – Angry" },
+        { "value": "underline-marker", "label": "Underline – Marker" },
+        { "value": "underline-needle", "label": "Underline – Needle" },
+        { "value": "underline-flat", "label": "Underline – Flat" },
+        { "value": "circle", "label": "Circle around text" },
+        { "value": "strikethrough", "label": "Strikethrough" }
+      ],
+      "default": "underline-curve"
+    },
+    {
+      "type": "color",
+      "id": "doodle_color",
+      "label": "Doodle stroke color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "stroke_width",
+      "label": "Stroke width",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Draw animation duration",
+      "min": 0.2,
+      "max": 5,
+      "step": 0.1,
+      "default": 1.2,
+      "unit": "s"
+    },
+    {
+      "type": "checkbox",
+      "id": "animate_on_scroll",
+      "label": "Animate on scroll into view",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "blur_on_animate",
+      "label": "Add blur-in effect to text",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "blur_repeat",
+      "label": "Repeat blur on every scroll",
+      "default": false,
+      "visible_if": "{{ block.settings.blur_on_animate }}"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Block width",
+      "options": [
+        { "value": "fit-content", "label": "Fit to content" },
+        { "value": "fill", "label": "Full width" },
+        { "value": "custom", "label": "Custom width (%)" }
+      ],
+      "default": "fit-content"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "Custom width (%)",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "default": 100,
+      "unit": "%",
+      "visible_if": "{{ block.settings.width == 'custom' }}"
+    },
+
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_block_start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_block_end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_start",
+      "label": "Left padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_end",
+      "label": "Right padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Doodle Heading",
+      "category": "t:categories.decorative",
+      "settings": {
+        "text": "TEST WORD",
+        "font_weight": "500",
+        "font_size": 28,
+        "text_color": "#000000",
+        "doodle_style": "strikethrough",
+        "doodle_color": "#000000",
+        "stroke_width": 4,
+        "animation_duration": 1.3,
+        "animate_on_scroll": false,
+        "blur_on_animate": true,
+        "blur_repeat": true,
+        "width": "fill",
+        "custom_width": 100,
+        "padding_block_start": 10,
+        "padding_block_end": 10,
+        "padding_inline_start": 10,
+        "padding_inline_end": 10
+      }
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,453 @@
+{% assign footer_menu_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .footer-menu-{{ footer_menu_id }} {
+    width: 100%;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+  }
+
+  .footer-menu__container-{{ footer_menu_id }} {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .footer-menu__header-{{ footer_menu_id }} {
+    margin-top: 0;
+    margin-bottom: {{ block.settings.header_spacing }}px;
+    font-size: {{ block.settings.header_size }}px;
+    font-weight: {{ block.settings.header_weight }};
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+.footer-menu__items-{{ footer_menu_id }} {
+  display: flex;
+  flex-direction: column;
+  gap: {{ block.settings.menu_item_spacing }}px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: {% if block.settings.text_alignment == 'center' %}center{% else %}flex-start{% endif %};
+  text-align: {{ block.settings.text_alignment }};
+}
+
+
+  .footer-menu__item-{{ footer_menu_id }} {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .footer-menu__link-{{ footer_menu_id }} {
+    text-decoration: none;
+    font-size: {{ block.settings.menu_item_size }}px;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  {% if block.settings.enable_link_hover_underline %}
+    .footer-menu__link-{{ footer_menu_id }}::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+      transform: scaleX(0.001);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .footer-menu__link-{{ footer_menu_id }}:hover::after {
+      transform: scaleX(1);
+    }
+
+    .footer-menu__link-{{ footer_menu_id }}:not(:hover)::after {
+      transform-origin: right;
+    }
+  {% endif %}
+
+  @media screen and (max-width: 749px) {
+  .footer-menu__items-{{ footer_menu_id }} {
+    gap: {{ block.settings.menu_item_spacing }}px;
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .footer-menu-{{ footer_menu_id }} {
+      padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    }
+
+    .footer-menu__header-{{ footer_menu_id }} {
+      display: none !important;
+    }
+
+    .footer-menu__header-{{ footer_menu_id }}:not(:empty) {
+      display: block;
+    }
+
+
+    .footer-menu-mobile-{{ footer_menu_id }} {
+      border-bottom: {% if block.settings.show_mobile_border %}1px solid currentColor{% else %}none{% endif %};
+    }
+
+    .footer-menu__header-mobile-{{ footer_menu_id }} {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 15px 0;
+      margin: 0;
+    }
+
+    .footer-menu__header-mobile-title-{{ footer_menu_id }} {
+      font-size: {{ block.settings.header_size_mobile }}px;
+      font-weight: {{ block.settings.header_weight }};
+      margin: 0;
+    }
+
+    .footer-menu__toggle-{{ footer_menu_id }} {
+      width: 16px;
+      height: 16px;
+      position: relative;
+      transition: transform 0.3s ease;
+      color: currentColor;
+    }
+
+    .footer-menu__toggle-{{ footer_menu_id }}::before,
+    .footer-menu__toggle-{{ footer_menu_id }}::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+      transition: transform 0.3s ease;
+    }
+
+    .footer-menu__toggle-{{ footer_menu_id }}::before {
+      transform: translateY(-50%);
+    }
+
+    .footer-menu__toggle-{{ footer_menu_id }}::after {
+      transform: translateY(-50%) rotate(90deg);
+    }
+
+    .footer-menu__toggle-{{ footer_menu_id }}.open::after {
+      transform: translateY(-50%) rotate(0deg);
+    }
+
+    .footer-menu__items-mobile-{{ footer_menu_id }} {
+      overflow: hidden;
+      opacity: 0;
+      padding-bottom: 0;
+      height: 0;
+      transition: height 0.4s ease, opacity 0.3s ease, padding-bottom 0.3s ease;
+      will-change: height, opacity;
+    }
+
+    .footer-menu__items-mobile-{{ footer_menu_id }}.animating {
+      transition: height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+
+    .footer-menu__items-mobile-{{ footer_menu_id }}.open {
+      opacity: 1;
+    }
+  }
+{% endstyle %}
+
+
+<footer-menu-{{ footer_menu_id }} class="footer-menu-{{ footer_menu_id }} {% if block.settings.inherit_color_scheme == false %} color-{{ color_scheme }}{% endif %}" {{ block.shopify_attributes }} >
+  <div class="footer-menu__container-{{ footer_menu_id }}">
+    {% if block.settings.menu != blank %}
+      {% if block.settings.header != blank %}
+        <h2 class="footer-menu__header-{{ footer_menu_id }}">{{ block.settings.header }}</h2>
+      {% endif %}
+
+      <ul class="footer-menu__items-{{ footer_menu_id }}">
+        {% for link in block.settings.menu.links %}
+          <li class="footer-menu__item-{{ footer_menu_id }}">
+            <a href="{{ link.url }}" class="footer-menu__link-{{ footer_menu_id }}">
+              {{ link.title }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <div class="footer-menu-mobile-{{ footer_menu_id }}" style="display: none;">
+        <div class="footer-menu__header-mobile-{{ footer_menu_id }}">
+          <h2 class="footer-menu__header-mobile-title-{{ footer_menu_id }}">{{ block.settings.header }}</h2>
+          <div class="footer-menu__toggle-{{ footer_menu_id }}"></div>
+        </div>
+
+        <ul class="footer-menu__items-{{ footer_menu_id }} footer-menu__items-mobile-{{ footer_menu_id }}">
+          {% for link in block.settings.menu.links %}
+            <li class="footer-menu__item-{{ footer_menu_id }}">
+              <a href="{{ link.url }}" class="footer-menu__link-{{ footer_menu_id }}">
+                {{ link.title }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</footer-menu-{{ footer_menu_id }}>
+
+<script>
+  (function() {
+    class FooterMenu{{ footer_menu_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.mobileBreakpoint = 749;
+        this.desktopMenu = this.querySelector('.footer-menu__items-{{ footer_menu_id }}');
+        this.mobileMenu = this.querySelector('.footer-menu-mobile-{{ footer_menu_id }}');
+        this.mobileMenuItems = this.querySelector('.footer-menu__items-mobile-{{ footer_menu_id }}');
+        this.mobileMenuToggle = this.querySelector('.footer-menu__toggle-{{ footer_menu_id }}');
+        this.mobileMenuHeader = this.querySelector('.footer-menu__header-mobile-{{ footer_menu_id }}');
+
+        this.setupEventListeners();
+        this.checkScreenSize();
+
+        window.addEventListener('load', () => this.checkScreenSize());
+        window.addEventListener('resize', () => this.checkScreenSize());
+      }
+
+      setupEventListeners() {
+        if (this.mobileMenuHeader) {
+          this.mobileMenuHeader.addEventListener('click', () => this.toggleMobileMenu());
+        }
+      }
+
+      checkScreenSize() {
+        const isMobile = window.innerWidth <= this.mobileBreakpoint;
+
+        if (isMobile) {
+          if (this.desktopMenu) this.desktopMenu.style.display = 'none';
+          if (this.mobileMenu) this.mobileMenu.style.display = 'block';
+        } else {
+          if (this.desktopMenu) this.desktopMenu.style.display = 'flex';
+          if (this.mobileMenu) this.mobileMenu.style.display = 'none';
+
+          if (this.mobileMenuItems) this.mobileMenuItems.classList.remove('open');
+          if (this.mobileMenuToggle) this.mobileMenuToggle.classList.remove('open');
+        }
+      }
+
+ toggleMobileMenu() {
+  const content = this.mobileMenuItems;
+  const toggleIcon = this.mobileMenuToggle;
+  const isOpen = content.classList.contains('open');
+
+  content.classList.add('animating');
+
+  if (isOpen) {
+    // --- Closing ---
+    const currentHeight = content.scrollHeight;
+    content.style.height = currentHeight + 'px';
+
+    requestAnimationFrame(() => {
+      content.style.height = '0px';
+      content.style.opacity = '0';
+      content.style.paddingBottom = '0px';
+    });
+
+    setTimeout(() => {
+      content.classList.remove('open');
+      content.classList.remove('animating');
+      content.style.height = '';
+    }, 400);
+  } else {
+    // --- Opening ---
+    content.classList.add('open'); // Add open first to render the items
+    content.style.height = 'auto';
+    const fullHeight = content.scrollHeight;
+
+    content.style.height = '0px'; // Reset to 0 first
+    content.style.opacity = '0';
+    content.style.paddingBottom = '0px';
+
+    requestAnimationFrame(() => {
+      content.style.height = fullHeight + 'px';
+      content.style.opacity = '1';
+      content.style.paddingBottom = '0px';
+    });
+
+    setTimeout(() => {
+      content.classList.remove('animating');
+      content.style.height = 'auto'; // Ensure auto for dynamic content
+    }, 400);
+  }
+
+  toggleIcon.classList.toggle('open');
+}
+
+    }
+
+customElements.define('{{ 'footer-menu-' | append: footer_menu_id | handle }}', FooterMenu{{ footer_menu_id | handleize }});
+  })();
+</script>
+
+
+{% schema %}
+{
+  "name": "Footer Menu",
+  "tag": null,
+  "class": "shopify-section-footer-menu",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "header",
+      "label": "Heading",
+      "default": "Quick links"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "footer"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text align",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "default": 1200
+    },
+
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mobile_border",
+      "label": "Show divider",
+      "default": true
+    },
+
+    {
+      "type": "header",
+      "content": "Heading style"
+    },
+    {
+      "type": "range",
+      "id": "header_size",
+      "label": "Size (desktop)",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "header_size_mobile",
+      "label": "Size (mobile)",
+      "min": 12,
+      "max": 28,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "header_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Spacing below",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 16
+    },
+
+    {
+      "type": "header",
+      "content": "Links style"
+    },
+    {
+      "type": "range",
+      "id": "menu_item_size",
+      "label": "Text size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "menu_item_spacing",
+      "label": "Spacing",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_link_hover_underline",
+      "label": "Underline on hover",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer Menu"
+    }
+  ]
+}
+{% endschema %}

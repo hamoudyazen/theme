@@ -1,0 +1,197 @@
+<style>
+  .details-content {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+  .menu-hover-scale {
+  transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+  display: inline-block;
+}
+.menu-hover-scale:hover {
+  transform: scale(1.1);
+}
+
+  
+#details-content-enter__page {
+  padding: 20px;
+}
+
+@-webkit-keyframes pulse {
+  from {
+    text-shadow: 0 0 0px var(--glow-color),
+                 0 0 0px var(--glow-color),
+                 0 0 0px var(--glow-color),
+                 0 0 0px var(--glow-color);
+  }
+  to {
+    text-shadow: 0 0 2px var(--glow-color),
+                 0 0 10px var(--glow-color),
+                 0 0 15px var(--glow-color),
+                 0 0 35px var(--glow-color);
+  }
+}
+.menu-link-pulse {
+  -webkit-animation: pulse 1.5s ease-in-out infinite alternate;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+  -webkit-backface-visibility: hidden;
+  text-decoration: none;
+}
+.menu-uppercase {
+  text-transform: uppercase;
+}
+</style>
+
+{% comment %}
+  Block: Enter Page Menu
+  Renders a responsive menu block with optional accordion behavior and color control.
+{% endcomment %}
+
+{% liquid
+  assign menu = block.settings.menu
+  assign heading = block.settings.heading
+  assign color_scheme = block.settings.color_scheme
+  assign show_as_accordion = block.settings.show_as_accordion
+  assign alignment = block.settings.text_alignment
+  assign show_numbers = block.settings.show_numbers
+  if show_as_accordion and block.settings.accordion_dividers
+    assign dividers_enabled = true
+  endif
+%}
+
+{% if menu != blank or heading != blank %}
+<accordion-custom
+  class="
+    menu
+    {% if show_as_accordion %} menu--accordion menu--{{ block.settings.accordion_icon }}{% endif %}
+    {% if dividers_enabled %} menu--dividers{% endif %}
+    text-align-{{ alignment }}
+  "
+  data-disable-on-desktop="true"
+  open-by-default-on-mobile
+>
+  <details
+    class="
+      menu__details spacing-style
+      {% unless block.settings.inherit_color_scheme %} color-{{ color_scheme }}{% endunless %}
+    "
+    style="
+      --spacing--size: {{ block.settings.menu_spacing }}px;
+      {% render 'spacing-style', settings: block.settings %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    <summary class="menu__heading{% if heading == blank %} menu__heading--empty{% endif %} {{ block.settings.heading_preset }}">
+      <span class="menu__heading__default">{{ heading }}</span>
+      <span class="menu__heading__accordion">
+        {{ heading | default: menu.title }}
+        <span class="menu__heading__toggle svg-wrapper icon-caret icon-animated">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+        <span class="menu__heading__toggle svg-wrapper icon-plus">
+          {{- 'icon-plus.svg' | inline_asset_content -}}
+        </span>
+      </span>
+    </summary>
+    <div class="details-content" id="details-content-enter__page">
+      {% if menu %}
+        <ul class="list-unstyled" style="text-align: {{ alignment }};">
+          {% for link in menu.links %}
+            <li class="menu__item {{ block.settings.link_preset }}">
+              <a
+                href="{{ link.url }}"
+class="
+  {% if block.settings.enable_glow %}menu-link-pulse{% endif %}
+  {% if block.settings.uppercase_links %} menu-uppercase{% endif %}
+  {% if block.settings.hover_scale %} menu-hover-scale{% endif %}
+"
+
+                style="
+                  {% if block.settings.enable_glow %}
+                    --glow-color: {{ block.settings.glow_color }};
+                  {% endif %}
+                "
+              >
+                {% if show_numbers %}
+                  {{ forloop.index }}.
+                {% endif %}
+                {{ link.title }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </details>
+</accordion-custom>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Enter Page Menu",
+  "tag": null,
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "header", "content": "Appearance" },
+    { "type": "range", "id": "menu_spacing", "label": "Vertical Gap", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 12 },
+    { "type": "select", "id": "text_alignment", "label": "Text Alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" },
+      { "value": "right", "label": "Right" }
+    ], "default": "left" },
+    { "type": "select", "id": "accordion_icon", "label": "Icon", "options": [
+      { "value": "caret", "label": "Caret" },
+      { "value": "plus", "label": "Plus" }
+    ], "default": "caret", "visible_if": "{{ block.settings.show_as_accordion == true }}" },
+    { "type": "checkbox", "id": "accordion_dividers", "label": "Show Dividers", "default": false, "visible_if": "{{ block.settings.show_as_accordion == true }}" },
+    { "type": "checkbox", "id": "inherit_color_scheme", "label": "Inherit Section Colors", "default": true },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color Scheme", "default": "scheme-1", "visible_if": "{{ block.settings.inherit_color_scheme == false }}" },
+
+    { "type": "header", "content": "Typography" },
+    { "type": "select", "id": "heading_preset", "label": "Heading Style", "options": [
+      { "value": "", "label": "Default" },
+      { "value": "paragraph", "label": "Paragraph" },
+      { "value": "h1", "label": "H1" },
+      { "value": "h2", "label": "H2" },
+      { "value": "h3", "label": "H3" },
+      { "value": "h4", "label": "H4" },
+      { "value": "h5", "label": "H5" },
+      { "value": "h6", "label": "H6" }
+    ], "default": "h3" },
+    { "type": "select", "id": "link_preset", "label": "Link Style", "options": [
+      { "value": "", "label": "Default" },
+      { "value": "paragraph", "label": "Paragraph" },
+      { "value": "h1", "label": "H1" },
+      { "value": "h2", "label": "H2" },
+      { "value": "h3", "label": "H3" },
+      { "value": "h4", "label": "H4" },
+      { "value": "h5", "label": "H5" },
+      { "value": "h6", "label": "H6" }
+    ], "default": "paragraph" },
+
+    { "type": "header", "content": "Glow Effect" },
+    { "type": "checkbox", "id": "enable_glow", "label": "Enable Link Glow + Pulse", "default": false },
+    { "type": "color", "id": "glow_color", "label": "Glow Color", "default": "#ffffff", "visible_if": "{{ block.settings.enable_glow }}" },
+
+    { "type": "header", "content": "Extras" },
+    { "type": "checkbox", "id": "hover_scale", "label": "Hover Scale Animation", "default": false },
+    { "type": "checkbox", "id": "show_numbers", "label": "Show Number Prefix", "default": false },
+    { "type": "checkbox", "id": "uppercase_links", "label": "Uppercase All Text", "default": false },
+
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding-block-start", "label": "Top Padding", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding-block-end", "label": "Bottom Padding", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding-inline-start", "label": "Left Padding", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding-inline-end", "label": "Right Padding", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "Enter Page Menu",
+      "category": "Navigation"
+    }
+  ]
+}
+{% endschema %}
