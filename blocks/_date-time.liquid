@@ -1,0 +1,123 @@
+{% comment %}
+  Block: Enter Page Date & Time
+  Displays the current date and time with customizable font, color, and padding.
+{% endcomment %}
+
+<div class="enter-page__datetime {{ block.settings.typography_style }}" {{ block.shopify_attributes }}>
+  <p
+    class="{{ block.settings.typography_style }}"
+    style="
+      color: {{ block.settings.text_color }};
+      text-align: {{ block.settings.text_alignment }};
+
+      padding-block-start: {{ block.settings.padding_top }}px;
+      padding-block-end: {{ block.settings.padding_bottom }}px;
+      padding-inline-start: {{ block.settings.padding_left }}px;
+      padding-inline-end: {{ block.settings.padding_right }}px;
+    "
+    id="datetime-{{ block.id }}"
+  >--/--/---- --:-- --</p>
+</div>
+
+<script>
+  function updateTime_{{ block.id | replace: '-', '_' }}() {
+    const now = new Date();
+    const date = now.toLocaleDateString().replace(/\./g, '/');
+    let hours = now.getHours();
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const time = `${hours}:${minutes} ${suffix}`;
+    document.getElementById('datetime-{{ block.id }}').textContent = `${date} ${time}`;
+  }
+  updateTime_{{ block.id | replace: '-', '_' }}();
+  setInterval(updateTime_{{ block.id | replace: '-', '_' }}, 1000);
+</script>
+
+{% schema %}
+{
+  "name": "Date & Time",
+  "tag": "div",
+  "class": "enter-block enter-block--datetime",
+  "settings": [
+    {
+      "type": "select",
+      "id": "typography_style",
+      "label": "Text Style",
+      "options": [
+        { "value": "", "label": "Default" },
+        { "value": "paragraph", "label": "Paragraph" },
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "paragraph"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Left Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Right Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Date & Time"
+    }
+  ]
+}
+{% endschema %}

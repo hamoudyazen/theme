@@ -1,0 +1,280 @@
+{% comment %}
+  Countdown Block — with separate typography presets for number and label
+{% endcomment %}
+
+<div
+  class="countdown-block{% unless block.settings.inherit_color_scheme %} color-{{ block.settings.color_scheme }}{% endunless %}"
+  style="
+    padding-block-start: {{ block.settings.padding_top }}px;
+    padding-block-end: {{ block.settings.padding_bottom }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  <div
+    class="countdown-block__inner"
+    style="gap: {{ block.settings.gap }}px; flex-direction: {{ block.settings.layout_direction }};"
+  >
+    {% assign labels = "days,hours,minutes,seconds" | split: ',' %}
+    {% assign texts = block.settings.label_days | append: ',' | append: block.settings.label_hours | append: ',' | append: block.settings.label_minutes | append: ',' | append: block.settings.label_seconds | split: ',' %}
+    {% for label in labels %}
+      <div class="countdown-item">
+        <div
+          id="countdown-{{ label }}-{{ block.id }}"
+          class="text-block {{ block.settings.number_type_preset }}"
+        >00</div>
+        <div
+          class="text-block {{ block.settings.label_type_preset }}"
+        >{{ texts[forloop.index0] }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .countdown-block__digits {
+    display: flex;
+    flex-direction: {{ block.settings.layout_direction }};
+  }
+
+  .countdown-block {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .countdown-block__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+  }
+
+  .text-block {
+    text-align: center;
+  }
+
+  @media screen and (max-width: 750px) {
+    .countdown-item {
+      font-size: 0.875em;
+    }
+  }
+</style>
+
+<script>
+  function startCountdown_{{ block.id | replace: '-', '_' }}() {
+    const endDate = new Date("{{ block.settings.end_date }}").getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = endDate - now;
+
+      if (distance <= 0) {
+        ['days', 'hours', 'minutes', 'seconds'].forEach(unit => {
+          document.getElementById(`countdown-${unit}-{{ block.id }}`).innerText = '00';
+        });
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown-days-{{ block.id }}").innerText = String(days).padStart(2, '0');
+      document.getElementById("countdown-hours-{{ block.id }}").innerText = String(hours).padStart(2, '0');
+      document.getElementById("countdown-minutes-{{ block.id }}").innerText = String(minutes).padStart(2, '0');
+      document.getElementById("countdown-seconds-{{ block.id }}").innerText = String(seconds).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+
+  if (Shopify.designMode) {
+    document.addEventListener('shopify:section:load', (e) => {
+      if (e.target.querySelector('#countdown-days-{{ block.id }}')) {
+        startCountdown_{{ block.id | replace: '-', '_' }}();
+      }
+    });
+    startCountdown_{{ block.id | replace: '-', '_' }}();
+  } else {
+    document.addEventListener('DOMContentLoaded', startCountdown_{{ block.id | replace: '-', '_' }});
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Countdown",
+  "settings": [
+
+    {
+      "type": "header",
+      "content": "Countdown Settings"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date and time",
+      "default": "2025-12-31T23:59:59",
+      "info": "Format: YYYY-MM-DDTHH:MM:SS (24hr)"
+    },
+
+    {
+      "type": "header",
+      "content": "Labels"
+    },
+    {
+      "type": "text",
+      "id": "label_days",
+      "label": "Label for days",
+      "default": "Days"
+    },
+    {
+      "type": "text",
+      "id": "label_hours",
+      "label": "Label for hours",
+      "default": "Hours"
+    },
+    {
+      "type": "text",
+      "id": "label_minutes",
+      "label": "Label for minutes",
+      "default": "Minutes"
+    },
+    {
+      "type": "text",
+      "id": "label_seconds",
+      "label": "Label for seconds",
+      "default": "Seconds"
+    },
+
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "number_type_preset",
+      "label": "Number typography preset",
+      "options": [
+        { "value": "rte", "label": "Default" },
+        { "value": "paragraph", "label": "Paragraph" },
+        { "value": "h1", "label": "Heading 1" },
+        { "value": "h2", "label": "Heading 2" },
+        { "value": "h3", "label": "Heading 3" },
+        { "value": "h4", "label": "Heading 4" },
+        { "value": "h5", "label": "Heading 5" },
+        { "value": "h6", "label": "Heading 6" }
+      ],
+      "default": "h3"
+    },
+    {
+      "type": "select",
+      "id": "label_type_preset",
+      "label": "Label typography preset",
+      "options": [
+        { "value": "rte", "label": "Default" },
+        { "value": "paragraph", "label": "Paragraph" },
+        { "value": "h1", "label": "Heading 1" },
+        { "value": "h2", "label": "Heading 2" },
+        { "value": "h3", "label": "Heading 3" },
+        { "value": "h4", "label": "Heading 4" },
+        { "value": "h5", "label": "Heading 5" },
+        { "value": "h6", "label": "Heading 6" }
+      ],
+      "default": "paragraph"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "select",
+      "id": "layout_direction",
+      "label": "Countdown layout",
+      "options": [
+        { "value": "row", "label": "Side by side" },
+        { "value": "column", "label": "Stacked vertically" }
+      ],
+      "default": "row"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between blocks",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 32
+    },
+
+    {
+      "type": "header",
+      "content": "Color Scheme"
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "Inherit section color scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Custom color scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    }
+
+  ],
+  "presets": [
+    {
+      "name": "Countdown",
+      "category": "Timers",
+      "settings": {
+        "end_date": "2025-12-31T23:59:59",
+        "label_days": "Days",
+        "label_hours": "Hours",
+        "label_minutes": "Minutes",
+        "label_seconds": "Seconds",
+        "layout_direction": "row",
+        "gap": 16,
+        "padding_top": 32,
+        "padding_bottom": 32,
+        "inherit_color_scheme": true,
+        "number_type_preset": "h3",
+        "label_type_preset": "paragraph"
+      }
+    }
+  ]
+}
+{% endschema %}

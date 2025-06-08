@@ -1,0 +1,106 @@
+
+
+{% render 'flexi-text' %}
+
+{% schema %}
+{
+  "name": "t:names.flexi_text",
+  "tag": null,
+  "settings": [
+    {
+      "id": "text",
+      "type": "textarea",
+      "label": "t:settings.text",
+      "default": "t:text_defaults.flexi_text"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "subheading",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "accent",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "none"
+    },
+      {
+        "type": "select",
+        "id": "text_effect",
+        "label": "t:settings.effects",
+        "options": [
+          {
+            "value": "none",
+            "label": "t:options.none"
+          },
+          {
+            "value": "blur",
+            "label": "t:options.blur"
+          }
+        ],
+        "default": "blur"
+      },
+      {
+      "type": "checkbox",
+      "id": "wiggle_char",
+      "label": "Random character bounce",
+      "default": true,
+    },
+    {
+      "type": "checkbox",
+      "id": "animation_repeat",
+      "label": "t:settings.animation_repeat",
+      "default": true,
+      "visible_if": "{{ block.settings.text_effect == \"blur\" }}"
+    },
+    {
+  "type": "checkbox",
+  "id": "hover_shrink_char",
+  "label": "Shrink on letter hover",
+  "default": true
+}
+
+  ],
+  "presets": [
+    {
+      "name": "t:names.flexi_text",
+      "category": "t:categories.decorative"
+    }
+  ]
+}
+{% endschema %}
